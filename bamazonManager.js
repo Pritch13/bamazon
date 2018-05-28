@@ -14,7 +14,7 @@ function managerQuestion() {
         name: "managerStart",
         type: "list",
         message: "Main menu",
-        choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product"]
+        choices: ["View Products for Sale", "View Low Inventory", "Add Inventory", "Add New Product"]
     }).then(answers => {
         if (answers.managerStart === "View Products for Sale") {
             console.log('\n Displaying all products in inventory: \n');
@@ -55,11 +55,20 @@ function lowInventory() {
 }
 
 function addInventory() {
+    connection.query("SELECT * FROM products", function (err, res) {
     inquirer.prompt([
         {
             type: "input",
-            message: "What item would you like to add inventory to?",
-            name: 'itemSelect'
+            message: "What item would you like to add inventory to? (By ID number)",
+            name: 'itemSelect',
+            validate: function (value) {
+                for (let i = 0; i < res.length; i++) {
+                    if (parseFloat(value) == res[i].item_id) {
+                        return true;
+                    }
+                }
+
+            }
         },
         {
             type: "input",
@@ -73,8 +82,26 @@ function addInventory() {
               }
         }
     ]).then(answers => {
-
+        if(answers.itemSelect > 0) {
+            connection.query(
+                "UPDATE products SET ? WHERE ?",
+                [
+                    {
+                        stock_quantity: quantTotal
+                    },
+                    {
+                        item_id: itemIdSelected
+                    }
+                ],
+                function (error) {
+                    if (error) throw err;
+                    console.log('\n Inventory updated! \n');
+                    displayItems();
+                }
+            );
+        }
     });
+});
 }
 
 function addItem() {
