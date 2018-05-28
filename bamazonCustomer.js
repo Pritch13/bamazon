@@ -28,10 +28,12 @@ function whatToBuy() {
                 message: "Which product would you like to purchase? (Please enter the ID number)",
                 name: 'idSelect',
                 validate: function (value) {
-                    if (isNaN(value) === false && value) {
-                        return true;
+                    for (let i = 0; i < res.length; i++) {
+                        if (isNaN(value) === false && parseFloat(value) == res[i].item_id) {
+                            return true;
+                        }
                     }
-                    return false;
+
                 }
             },
             {
@@ -39,7 +41,7 @@ function whatToBuy() {
                 message: "How many units would you like to order?",
                 name: 'unitSelect',
                 validate: function (value) {
-                    if (isNaN(value) === false && value) {
+                    if (isNaN(value) === false) {
                         return true;
                     }
                     return false;
