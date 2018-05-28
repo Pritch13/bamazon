@@ -19,6 +19,25 @@ function displayItems() {
     });
 }
 
+function update() {
+    connection.query(
+        "UPDATE products SET ? WHERE ?",
+        [
+            {
+                stock_quantity: answers.bid
+            },
+            {
+                item_id: chosenItem.id
+            }
+        ],
+        function (error) {
+            if (error) throw err;
+            console.log('\n Processing you order and updating inventory! \n\n Thankyou for shopping with Bamazon! \n');
+            connection.end();
+        }
+    );
+}
+
 function whatToBuy() {
     connection.query("SELECT * FROM products", function (err, res) {
         inquirer.prompt([
@@ -46,6 +65,11 @@ function whatToBuy() {
             }
 
         ]).then(answers => {
+
+            var itemIdSelected = parseFloat(answers.idSelect);
+            var quantitySelected = parseFloat(answers.unitSelect);
+
+
             connection.query("SELECT * FROM products", function (err, res) {
                 if (err) throw err;
                 for (let i = 0; i < res.length; i++) {
@@ -54,6 +78,7 @@ function whatToBuy() {
 
                         if (parseInt(answers.unitSelect) <= res[i].stock_quantity) {
                             console.log('\n We have enough in stock! \n');
+                            var quantTotal = res[i].stock_quantity - quantitySelected;
                             inquirer.prompt([
                                 {
                                     type: "confirm",
@@ -64,9 +89,23 @@ function whatToBuy() {
                                 if (!answers.confirm) {
                                     console.log('\n Perhaps you would like to buy another item... \n');
                                     whatToBuy();
-                                } else {
-                                    console.log('\n Processing you order and updating inventory! \n\n Thankyou for shopping with Bamazon! \n');
-                                    connection.end();
+                                } else if (answers.confirm) {
+                                    connection.query(
+                                        "UPDATE products SET ? WHERE ?",
+                                        [
+                                            {
+                                                stock_quantity: quantTotal
+                                            },
+                                            {
+                                                item_id: itemIdSelected
+                                            }
+                                        ],
+                                        function (error) {
+                                            if (error) throw err;
+                                            console.log('\n Processing you order and updating inventory! \n\n Thankyou for shopping with Bamazon! \n');
+                                            connection.end();
+                                        }
+                                    );
                                 }
                             });
 
