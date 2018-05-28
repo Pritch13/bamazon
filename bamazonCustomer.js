@@ -20,54 +20,70 @@ function displayItems() {
 }
 
 function whatToBuy() {
-    inquirer.prompt([
-        {
-            type: "input",
-            message: "Which product would you like to purchase? (Please enter the ID number)",
-            name: 'idSelect'
-        },
-        {
-            type: "input",
-            message: "How many units would you like to order?",
-            name: 'unitSelect'
-        }
-    ]).then(answers => {
-        connection.query("SELECT * FROM products", function (err, res) {
-            if (err) throw err;
-            for (let i = 0; i < res.length; i++) {
-                if (parseInt(answers.idSelect) === res[i].item_id) {
-                    console.log('Checking our ' + res[i].product_name + ' inventory...');
-
-                    if (parseInt(answers.unitSelect) <= res[i].stock_quantity) {
-                        console.log('\n We have enough in stock! \n');
-                        inquirer.prompt([
-                            {
-                                type: "confirm",
-                                message: 'Are you sure you want to buy ' + answers.unitSelect + ' ' + res[i].product_name + "'s?",
-                                name: 'confirm'
-                            }
-                        ]).then(answers => {
-                            if (!answers.confirm) {
-                                console.log('\n Perhaps you would like to buy another item... \n');
-                                whatToBuy();
-                            } else {
-                                console.log('\n Processing you order and updating inventory! \n\n Thankyou for shopping with Bamazon \n');
-                                connection.end();
-                            }
-                        });
-
+    connection.query("SELECT * FROM products", function (err, res) {
+        inquirer.prompt([
+            {
+                type: "input",
+                message: "Which product would you like to purchase? (Please enter the ID number)",
+                name: 'idSelect',
+                validate: function (value) {
+                    if (isNaN(value) === false && value) {
+                        return true;
                     }
-                    if (res[i].stock_quantity < parseInt(answers.unitSelect)) {
-                        console.log("\n Sorry we don't have enough of that product, please select again! \n ");
-                        whatToBuy();
+                    return false;
+                }
+            },
+            {
+                type: "input",
+                message: "How many units would you like to order?",
+                name: 'unitSelect',
+                validate: function (value) {
+                    if (isNaN(value) === false && value) {
+                        return true;
                     }
+                    return false;
                 }
             }
 
-        });
+        ]).then(answers => {
+            connection.query("SELECT * FROM products", function (err, res) {
+                if (err) throw err;
+                for (let i = 0; i < res.length; i++) {
+                    if (parseInt(answers.idSelect) === res[i].item_id) {
+                        console.log('\n Checking our ' + res[i].product_name + ' inventory...');
 
+                        if (parseInt(answers.unitSelect) <= res[i].stock_quantity) {
+                            console.log('\n We have enough in stock! \n');
+                            inquirer.prompt([
+                                {
+                                    type: "confirm",
+                                    message: 'Are you sure you want to buy ' + answers.unitSelect + ' ' + res[i].product_name + "'s?",
+                                    name: 'confirm'
+                                }
+                            ]).then(answers => {
+                                if (!answers.confirm) {
+                                    console.log('\n Perhaps you would like to buy another item... \n');
+                                    whatToBuy();
+                                } else {
+                                    console.log('\n Processing you order and updating inventory! \n\n Thankyou for shopping with Bamazon! \n');
+                                    connection.end();
+                                }
+                            });
+
+                        }
+                        if (res[i].stock_quantity < parseInt(answers.unitSelect)) {
+                            console.log("\n Sorry we don't have enough of that product, please select again! \n ");
+                            whatToBuy();
+                        }
+                    }
+                }
+
+            });
+
+        });
     });
 }
+
 
 
 
