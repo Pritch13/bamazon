@@ -19,24 +19,6 @@ function displayItems() {
     });
 }
 
-function update() {
-    connection.query(
-        "UPDATE products SET ? WHERE ?",
-        [
-            {
-                stock_quantity: answers.bid
-            },
-            {
-                item_id: chosenItem.id
-            }
-        ],
-        function (error) {
-            if (error) throw err;
-            console.log('\n Processing you order and updating inventory! \n\n Thankyou for shopping with Bamazon! \n');
-            connection.end();
-        }
-    );
-}
 
 function whatToBuy() {
     connection.query("SELECT * FROM products", function (err, res) {
