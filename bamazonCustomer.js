@@ -36,14 +36,29 @@ function whatToBuy() {
             if (err) throw err;
             for (let i = 0; i < res.length; i++) {
                 if (parseInt(answers.idSelect) === res[i].item_id) {
-                    console.log(res[i].product_name);
+                    console.log('Checking our ' + res[i].product_name + ' inventory...');
 
                     if (parseInt(answers.unitSelect) <= res[i].stock_quantity) {
-                        console.log('We have enough!');
+                        console.log('\n We have enough in stock! \n');
+                        inquirer.prompt([
+                            {
+                                type: "confirm",
+                                message: 'Are you sure you want to buy ' + answers.unitSelect + ' ' + res[i].product_name + "'s?",
+                                name: 'confirm'
+                            }
+                        ]).then(answers => {
+                            if (!answers.confirm) {
+                                console.log('\n Perhaps you would like to buy another item... \n');
+                                whatToBuy();
+                            } else {
+                                console.log('\n Processing you order and updating inventory! \n\n Thankyou for shopping with Bamazon \n');
+                                connection.end();
+                            }
+                        });
 
                     }
                     if (res[i].stock_quantity < parseInt(answers.unitSelect)) {
-                        console.log("Sorry we don't have enough of that product, please select again!");
+                        console.log("\n Sorry we don't have enough of that product, please select again! \n ");
                         whatToBuy();
                     }
                 }
