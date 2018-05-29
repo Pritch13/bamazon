@@ -22,7 +22,7 @@ function managerQuestion() {
         } else if (answers.managerStart === "View Low Inventory") {
             console.log('\n Displaying all products with low inventory: \n');
             lowInventory();
-        } else if (answers.managerStart === "Add to Inventory") {
+        } else if (answers.managerStart === "Add Inventory") {
             console.log('\n Add new inventory to existing items: \n');
             addInventory();
         } else if (answers.managerStart === "Add New Product") {
@@ -60,7 +60,7 @@ function addInventory() {
         {
             type: "input",
             message: "What item would you like to add inventory to? (By ID number)",
-            name: 'itemSelect',
+            name: 'idSelect',
             validate: function (value) {
                 for (let i = 0; i < res.length; i++) {
                     if (parseFloat(value) == res[i].item_id) {
@@ -82,15 +82,21 @@ function addInventory() {
               }
         }
     ]).then(answers => {
+
+        for (let i = 0; i < res.length; i++) {
+            if (parseFloat(answers.idSelect) === res[i].item_id) {
+                var newQuantity = parseFloat(answers.itemSelect) + res[i].stock_quantity;
+            }
+        }
         if(answers.itemSelect > 0) {
             connection.query(
                 "UPDATE products SET ? WHERE ?",
                 [
                     {
-                        stock_quantity: quantTotal
+                        stock_quantity: newQuantity
                     },
                     {
-                        item_id: itemIdSelected
+                        item_id: answers.idSelect
                     }
                 ],
                 function (error) {
