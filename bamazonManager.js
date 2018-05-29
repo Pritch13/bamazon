@@ -56,6 +56,9 @@ function lowInventory() {
 
 function addInventory() {
     connection.query("SELECT * FROM products", function (err, res) {
+        for (let i = 0; i < res.length; i++) {
+            console.log('\n ID: ' + res[i].item_id + '\n Name: ' + res[i].product_name + '\n Price: ' + res[i].price + '\n Stock quantity: ' + res[i].stock_quantity + '\n Department: ' + res[i].department_name + '\n');
+        }
     inquirer.prompt([
         {
             type: "input",
